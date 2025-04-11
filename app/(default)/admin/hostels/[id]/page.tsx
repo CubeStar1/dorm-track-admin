@@ -10,15 +10,15 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RoomList } from '@/components/rooms/room-list';
 import { EditHostelDialog } from '@/components/hostels/edit-hostel-dialog';
-import { Building2, MapPin, Mail, Phone, Users2, Home, Pencil } from 'lucide-react';
-
+import { Building2, MapPin, Mail, Phone, Users2, Home, Pencil, UtensilsCrossed } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 export default function HostelDetailsPage() {
   const params = useParams();
   const hostelId = params.id as string;
   const queryClient = useQueryClient();
   const { institutionId, isLoading: isLoadingInstitution } = useInstitution();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-
+  const router = useRouter();
   const { data: hostel, isLoading: isLoadingHostel } = useQuery({
     queryKey: ['hostel', hostelId],
     queryFn: () => hostelService.getHostel(hostelId),
@@ -74,6 +74,7 @@ export default function HostelDetailsPage() {
           <TabsList>
             <TabsTrigger value="details">Hostel Details</TabsTrigger>
             <TabsTrigger value="rooms">Rooms</TabsTrigger>
+            <TabsTrigger value="mess-menu">Mess Menu</TabsTrigger>
           </TabsList>
 
           <TabsContent value="details" className="space-y-6">
@@ -134,6 +135,24 @@ export default function HostelDetailsPage() {
 
           <TabsContent value="rooms">
             <RoomList hostelId={hostelId} />
+          </TabsContent>
+
+          <TabsContent value="mess-menu">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-semibold">Mess Menu</h2>
+                  <p className="text-sm text-muted-foreground">Manage the hostel's mess menu</p>
+                </div>
+                <Button className="gap-2" onClick={() => router.push(`/admin/hostels/${hostelId}/mess-menu`)}>
+                  <UtensilsCrossed className="w-4 h-4" />
+                  Manage Menu
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">Click the button above to manage the mess menu for this hostel.</p>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
 

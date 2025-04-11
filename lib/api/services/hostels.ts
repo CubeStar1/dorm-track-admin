@@ -10,6 +10,10 @@ export interface Hostel {
   institution_id: string;
   created_at: string;
   updated_at: string;
+  contact_email: string;
+  contact_phone: string;
+  total_blocks: number;
+  total_rooms: number;
 }
 
 export interface HostelFilters {
