@@ -57,6 +57,9 @@ create table public.rooms (
     updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
     constraint valid_status check (status in ('available', 'occupied', 'maintenance')),
     constraint valid_room_type check (room_type in ('Single', 'Double', 'Triple')),
+    constraint rooms_pkey primary key (id),
+    constraint rooms_hostel_id_room_number_block_key unique (hostel_id, room_number, block),
+    constraint rooms_hostel_id_fkey foreign key (hostel_id) references hostels (id),
     unique(hostel_id, room_number)
 );
 
