@@ -29,7 +29,7 @@ const navigationGroups = [
     items: [
       {
         title: "Dashboard",
-        href: "/dashboard",
+        href: "/admin/dashboard",
         icon: LayoutDashboard,
         description: "Overview of your hostel life",
       },
