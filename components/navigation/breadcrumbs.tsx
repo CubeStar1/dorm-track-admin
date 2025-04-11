@@ -18,67 +18,22 @@ const routes = {
     name: "Home",
     path: "/",
   },
-  "/rooms": {
+  "/admin": {
+    name: "Admin",
+    path: "/admin",
+  },
+  "/admin/hostels": {
+    name: "Hostels",
+    path: "/admin/hostels",
+  },
+  "/admin/hostels/[id]": {
+    name: "Hostel Details",
+    path: "/admin/hostels/[id]",
+  },
+  "/admin/rooms": {
     name: "Rooms",
-    path: "/rooms",
-    description: "View and manage rooms",
+    path: "/admin/rooms",
   },
-  "/complaints": {
-    name: "Complaints",
-    path: "/complaints",
-    description: "View and manage complaints",
-  },
-  "/maintenance": {
-    name: "Maintenance",
-    path: "/maintenance",
-    description: "View and manage maintenance requests",
-  },
-  "/labelling": {
-    name: "Data Labelling",
-    path: "/labelling",
-    description: "Manual data labelling",
-  },
-  "/zsl": {
-    name: "Zero-Shot Learning",
-    path: "/zsl",
-    description: "Zero-shot learning models",
-    subRoutes: {
-      "/zsl/deberta": {
-        name: "DeBERTa Model",
-        path: "/zsl/deberta",
-        description: "DeBERTa-based classification",
-      },
-      "/zsl/codebert": {
-        name: "CodeBERT Model",
-        path: "/zsl/codebert",
-        description: "CodeBERT-based classification",
-      }
-    }
-  },
-  "/random-forest": {
-    name: "Random Forest",
-    path: "/random-forest",
-    description: "Random Forest classification",
-  },
-  "/settings": {
-    name: "Settings",
-    path: "/settings",
-    description: "System configuration",
-    subRoutes: {
-      "/settings/analysis": {
-        name: "Analysis Configuration",
-        path: "/settings/analysis",
-      },
-      "/settings/scanning": {
-        name: "Scanning Parameters",
-        path: "/settings/scanning",
-      },
-      "/settings/thresholds": {
-        name: "Detection Thresholds",
-        path: "/settings/thresholds",
-      }
-    }
-  }
 }
 
 export function Breadcrumbs({ 

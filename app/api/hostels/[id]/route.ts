@@ -129,10 +129,10 @@ export async function PATCH(
         address: data.address,
         city: data.city,
         state: data.state,
-        contact_email: data.contactEmail,
-        contact_phone: data.contactPhone,
-        total_blocks: data.totalBlocks,
-        total_rooms: data.totalRooms
+        contact_email: data.contact_email,
+        contact_phone: data.contact_phone,
+        total_blocks: data.total_blocks,
+        total_rooms: data.total_rooms
       })
       .eq('id', params.id)
       .select()

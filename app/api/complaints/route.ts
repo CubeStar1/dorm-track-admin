@@ -1,60 +1,86 @@
 import { createSupabaseServer } from '@/lib/supabase/server';
-import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
-export async function GET() {
+// GET /api/complaints - Get all complaints
+export async function GET(request: Request) {
   try {
     const supabase = await createSupabaseServer();
 
-    // Check if user is authenticated
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
+    // Verify authentication
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !session) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Not authenticated' },
         { status: 401 }
       );
     }
 
-    // Get student record
-    const { data: student } = await supabase
-      .from('students')
-      .select('user_id, hostel_id')
-      .eq('user_id', session.user.id)
+    // Get user's role and institution
+    const { data: user } = await supabase
+      .from('users')
+      .select('role, institution_id')
+      .eq('id', session.user.id)
       .single();
 
-    if (!student) {
+    if (!user) {
       return NextResponse.json(
-        { error: 'Student record not found' },
+        { error: 'User not found' },
         { status: 404 }
       );
     }
 
-    // Fetch complaints with expanded data
-    const { data: complaints, error } = await supabase
+    let query = supabase
       .from('complaints')
       .select(`
         *,
+        student:students(
+          student_id,
+          user:users(
+            full_name,
+            email
+          )
+        ),
         hostel:hostels(
           id,
           name,
-          code
+          code,
+          institution_id
         ),
-        assigned_staff:users(
+        room:rooms(
+          id,
+          room_number,
+          block
+        ),
+        assigned_to:users(
           id,
           full_name,
           email
         )
-      `)
-      .eq('student_id', student.user_id)
-      .order('created_at', { ascending: false });
+      `);
+
+    // Filter based on user role
+    if (user.role === 'student') {
+      // Students can only see their own complaints
+      query = query.eq('student_id', session.user.id);
+    } else {
+      // Admin and wardens can see complaints from their institution
+      // Join with hostels to filter by institution_id
+      query = query.eq('hostel.institution_id', user.institution_id);
+    }
+
+    const { data: complaints, error } = await query;
 
     if (error) {
-      throw error;
+      console.error('Error fetching complaints:', error);
+      return NextResponse.json(
+        { error: 'Failed to fetch complaints' },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json(complaints);
   } catch (error) {
-    console.error('Error fetching complaints:', error);
+    console.error('Complaints fetch error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -62,69 +88,59 @@ export async function GET() {
   }
 }
 
+// POST /api/complaints - Create a new complaint
 export async function POST(request: Request) {
   try {
     const supabase = await createSupabaseServer();
 
-    // Check if user is authenticated
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
+    // Verify authentication
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !session) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Not authenticated' },
         { status: 401 }
       );
     }
 
-    // Get student record
+    // Get the student's information
     const { data: student } = await supabase
       .from('students')
-      .select('user_id, hostel_id')
+      .select('*')
       .eq('user_id', session.user.id)
       .single();
 
     if (!student) {
       return NextResponse.json(
-        { error: 'Student record not found' },
-        { status: 404 }
+        { error: 'Only students can create complaints' },
+        { status: 403 }
       );
     }
 
-    // Get request body
-    const body = await request.json();
+    const data = await request.json();
 
-    // Create complaint
     const { data: complaint, error } = await supabase
       .from('complaints')
       .insert({
+        ...data,
+        student_id: session.user.id,
         hostel_id: student.hostel_id,
-        student_id: student.user_id,
-        complaint_type: body.complaint_type,
-        description: body.description,
-        severity: body.severity,
-        is_anonymous: body.is_anonymous,
+        room_id: student.room_id,
+        status: 'pending'
       })
-      .select(`
-        *,
-        hostel:hostels(
-          id,
-          name,
-          code
-        ),
-        assigned_staff:users(
-          id,
-          full_name,
-          email
-        )
-      `)
+      .select()
       .single();
 
     if (error) {
-      throw error;
+      console.error('Error creating complaint:', error);
+      return NextResponse.json(
+        { error: 'Failed to create complaint' },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json(complaint);
   } catch (error) {
-    console.error('Error creating complaint:', error);
+    console.error('Complaint creation error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

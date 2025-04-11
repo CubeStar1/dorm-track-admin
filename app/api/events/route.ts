@@ -1,103 +1,77 @@
 import { createSupabaseServer } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
-export async function GET() {
+// GET /api/events - Get all events
+export async function GET(request: Request) {
   try {
     const supabase = await createSupabaseServer();
 
+    // Verify authentication
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     if (sessionError || !session) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Not authenticated' },
         { status: 401 }
       );
     }
 
-    // Get user's institution_id
-    const { data: user, error: userError } = await supabase
+    // Get user's role and institution
+    const { data: user } = await supabase
       .from('users')
-      .select('institution_id')
+      .select('role, institution_id')
       .eq('id', session.user.id)
       .single();
 
-    if (userError || !user) {
+    if (!user) {
       return NextResponse.json(
         { error: 'User not found' },
         { status: 404 }
       );
     }
 
-    // Get student record if exists (to check registration status)
-    const { data: student } = await supabase
-      .from('students')
-      .select('user_id')
-      .eq('user_id', session.user.id)
-      .single();
-
-    // Get events with registration counts and organizer info
-    const { data: events, error: eventsError } = await supabase
+    // Get events with registration counts
+    const { data: events, error } = await supabase
       .from('events')
       .select(`
         *,
-        organizer:users!organizer_id(
+        organizer:users(
           id,
           full_name,
-          email
-        ),
-        registrations:event_registrations(
-          id,
-          status,
-          student:students(
-            user_id,
-            student_id,
-            user:users(
-              id,
-              full_name,
-              email
-            ),
-            hostel:hostels(
-              id,
-              name,
-              code
-            )
-          )
+          email,
+          phone
         )
       `)
-      .eq('institution_id', user.institution_id)
-      .order('event_date', { ascending: true });
+      .eq('institution_id', user.institution_id);
 
-    if (eventsError) {
+    if (error) {
+      console.error('Error fetching events:', error);
       return NextResponse.json(
         { error: 'Failed to fetch events' },
         { status: 500 }
       );
     }
 
-    // If user is a student, check their registration status for each event
-    if (student) {
-      const { data: registrations } = await supabase
-        .from('event_registrations')
-        .select('event_id, status')
-        .eq('student_id', session.user.id);
+    // Get registration counts for all events
+    const { data: registrationCounts, error: countError } = await supabase
+      .rpc('get_event_registration_counts', { institution_id: user.institution_id });
 
-      const registrationMap = new Map(
-        registrations?.map(reg => [reg.event_id, reg.status]) || []
+    if (countError) {
+      console.error('Error fetching registration counts:', countError);
+      return NextResponse.json(
+        { error: 'Failed to fetch registration counts' },
+        { status: 500 }
       );
-
-      events.forEach(event => {
-        event.registrations_count = event.registrations?.filter((r: { status: string }) => r.status === 'registered').length || 0;
-        event.is_registered = registrationMap.get(event.id) === 'registered';
-        // Keep the registrations array for the frontend
-      });
-    } else {
-      events.forEach(event => {
-        event.registrations_count = event.registrations?.filter((r: { status: string }) => r.status === 'registered').length || 0;
-        // Keep the registrations array for the frontend
-      });
     }
 
-    return NextResponse.json(events);
+    // Combine events with their registration counts
+    const eventsWithCounts = events.map(event => ({
+      ...event,
+      registration_count: registrationCounts?.find((rc: { event_id: string; count: number }) => rc.event_id === event.id)?.count || 0
+    }));
+
+    return NextResponse.json(eventsWithCounts);
   } catch (error) {
+    console.error('Events fetch error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -105,86 +79,65 @@ export async function GET() {
   }
 }
 
+// POST /api/events - Create a new event
 export async function POST(request: Request) {
   try {
     const supabase = await createSupabaseServer();
 
+    // Verify authentication
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     if (sessionError || !session) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Not authenticated' },
         { status: 401 }
       );
     }
 
-    // Get user's institution_id and role
-    const { data: user, error: userError } = await supabase
+    // Get user's role and institution
+    const { data: user } = await supabase
       .from('users')
-      .select('institution_id, role')
+      .select('role, institution_id')
       .eq('id', session.user.id)
       .single();
 
-    if (userError || !user) {
+    if (!user) {
       return NextResponse.json(
         { error: 'User not found' },
         { status: 404 }
       );
     }
 
-    // Only staff members can create events
-    if (user.role === 'student') {
+    // Only admin and wardens can create events
+    if (!['admin', 'warden'].includes(user.role)) {
       return NextResponse.json(
-        { error: 'Only staff members can create events' },
+        { error: 'Unauthorized to create events' },
         { status: 403 }
       );
     }
 
-    const body = await request.json();
-    const {
-      title,
-      description,
-      event_date,
-      location,
-      max_participants,
-      registration_deadline,
-      image_url,
-      category
-    } = body;
+    const data = await request.json();
 
-    // Validate required fields
-    if (!title || !description || !event_date || !location || !category) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
-    }
-
-    // Create event
-    const { data: event, error: createError } = await supabase
+    const { data: event, error } = await supabase
       .from('events')
       .insert({
-        institution_id: user.institution_id,
+        ...data,
         organizer_id: session.user.id,
-        title,
-        description,
-        event_date,
-        location,
-        max_participants,
-        registration_deadline,
-        image_url,
-        category
+        institution_id: user.institution_id,
+        status: 'upcoming'
       })
       .select(`
         *,
-        organizer:users!organizer_id(
+        organizer:users(
           id,
           full_name,
-          email
+          email,
+          phone
         )
       `)
       .single();
 
-    if (createError) {
+    if (error) {
+      console.error('Error creating event:', error);
       return NextResponse.json(
         { error: 'Failed to create event' },
         { status: 500 }
@@ -193,6 +146,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(event);
   } catch (error) {
+    console.error('Event creation error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

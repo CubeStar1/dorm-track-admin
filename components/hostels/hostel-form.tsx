@@ -38,9 +38,16 @@ type HostelFormData = z.infer<typeof hostelSchema>;
 interface HostelFormProps {
   hostel?: Hostel;
   institutionId: string;
+  onSuccess?: () => void;
+  hideBackButton?: boolean;
 }
 
-export function HostelForm({ hostel, institutionId }: HostelFormProps) {
+export function HostelForm({ 
+  hostel, 
+  institutionId, 
+  onSuccess,
+  hideBackButton = false 
+}: HostelFormProps) {
   const router = useRouter();
   const form = useForm<HostelFormData>({
     resolver: zodResolver(hostelSchema),
@@ -50,52 +57,69 @@ export function HostelForm({ hostel, institutionId }: HostelFormProps) {
       contactPhone: hostel.contact_phone,
       totalBlocks: hostel.total_blocks,
       totalRooms: hostel.total_rooms,
+      institution_id: hostel.institution_id
     } : {
-      institution_id: institutionId,
+      name: '',
+      code: '',
+      address: '',
+      city: '',
+      state: '',
+      contactEmail: '',
+      contactPhone: '',
       totalBlocks: 1,
-      totalRooms: 1
+      totalRooms: 1,
+      institution_id: institutionId
     }
   });
 
-  const onSubmit = async (data: HostelFormData) => {
+  const onSubmit = async (formData: HostelFormData) => {
     try {
+      // Transform the data to match the API expectations
       const apiData = {
-        ...data,
-        contact_email: data.contactEmail,
-        contact_phone: data.contactPhone,
-        total_blocks: data.totalBlocks,
-        total_rooms: data.totalRooms
+        name: formData.name,
+        code: formData.code,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        contact_email: formData.contactEmail,
+        contact_phone: formData.contactPhone,
+        total_blocks: formData.totalBlocks,
+        total_rooms: formData.totalRooms,
+        institution_id: formData.institution_id
       };
 
       if (hostel) {
         await hostelService.updateHostel(hostel.id, apiData);
         toast.success('Hostel updated successfully');
       } else {
-        await hostelService.createHostel(apiData as CreateHostelData);
+        await hostelService.createHostel(apiData);
         toast.success('Hostel created successfully');
       }
+      onSuccess?.();
       router.push('/admin/hostels');
       router.refresh();
     } catch (error) {
-      toast.error('Failed to save hostel');
       console.error('Hostel save error:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to save hostel');
     }
   };
 
   return (
     <div>
-      <div className="mb-6">
-        <Button
-          variant="ghost"
-          className="gap-2"
-          asChild
-        >
-          <Link href="/admin/hostels">
-            <ArrowLeft className="w-4 h-4" />
-            Back to Hostels
-          </Link>
-        </Button>
-      </div>
+      {!hideBackButton && (
+        <div className="mb-6">
+          <Button
+            variant="ghost"
+            className="gap-2"
+            asChild
+          >
+            <Link href="/admin/hostels">
+              <ArrowLeft className="w-4 h-4" />
+              Back to Hostels
+            </Link>
+          </Button>
+        </div>
+      )}
 
       <Card>
         <CardHeader className="space-y-1">

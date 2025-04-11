@@ -1,92 +1,92 @@
-import Link from 'next/link';
+import { Calendar, MapPin, Users } from 'lucide-react';
+import { Event } from '@/lib/api/services/events';
 import { format } from 'date-fns';
-import { motion } from 'framer-motion';
-import { Calendar, Clock, MapPin, Users, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import type { Event } from '@/lib/api/services/events';
-import { CATEGORY_COLORS, CATEGORY_LABELS, STATUS_COLORS } from './event-constants';
+import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
 
 interface EventCardProps {
   event: Event;
-  index: number;
 }
 
-export function EventCard({ event, index }: EventCardProps) {
+const eventStatusColors = {
+  upcoming: 'bg-blue-100 text-blue-800',
+  ongoing: 'bg-green-100 text-green-800',
+  completed: 'bg-gray-100 text-gray-800',
+  cancelled: 'bg-red-100 text-red-800',
+} as const;
+
+const eventCategoryColors = {
+  cultural: 'bg-purple-100 text-purple-800',
+  sports: 'bg-orange-100 text-orange-800',
+  academic: 'bg-indigo-100 text-indigo-800',
+  social: 'bg-pink-100 text-pink-800',
+  other: 'bg-gray-100 text-gray-800',
+} as const;
+
+export function EventCard({ event }: EventCardProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1 }}
+    <Link
+      href={`/admin/events/${event.id}`}
+      className="block overflow-hidden bg-white rounded-xl border transition-all hover:shadow-lg"
     >
-      <Link href={`/events/${event.id}`}>
-        <Card className="h-full hover:shadow-lg transition-shadow">
-          {event.image_url && (
-            <div className="relative h-48 w-full">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={event.image_url}
-                alt={event.title}
-                className="absolute inset-0 w-full h-full object-cover rounded-t-lg"
-              />
-            </div>
-          )}
-          <CardHeader>
-            <div className="flex items-center justify-between gap-4">
-              <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-                CATEGORY_COLORS[event.category].bg
-              } ${CATEGORY_COLORS[event.category].text}`}>
-                {CATEGORY_LABELS[event.category]}
-              </div>
-              <span className={`text-sm font-medium capitalize ${STATUS_COLORS[event.status]}`}>
-                {event.status}
+      {event.image_url ? (
+        <div className="aspect-[2/1] relative overflow-hidden">
+          <img
+            src={event.image_url}
+            alt={event.title}
+            className="object-cover w-full h-full"
+          />
+        </div>
+      ) : (
+        <div className="aspect-[2/1] bg-gradient-to-br from-blue-500/20 to-purple-500/20" />
+      )}
+      <div className="p-4">
+        <div className="flex items-start justify-between gap-4 mb-3">
+          <h3 className="font-semibold text-lg line-clamp-1">{event.title}</h3>
+          <Badge
+            variant="secondary"
+            className={eventStatusColors[event.status]}
+          >
+            {event.status}
+          </Badge>
+        </div>
+        <p className="text-sm text-gray-600 line-clamp-2 mb-4">
+          {event.description}
+        </p>
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <Calendar className="w-4 h-4" />
+            <span>
+              {format(new Date(event.event_date), 'MMM d, yyyy h:mm a')}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <MapPin className="w-4 h-4" />
+            <span>{event.location}</span>
+          </div>
+          {event.max_participants && (
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Users className="w-4 h-4" />
+              <span>
+                {event.registration_count || 0} / {event.max_participants} registered
               </span>
             </div>
-            <CardTitle className="line-clamp-2">{event.title}</CardTitle>
-            <CardDescription className="line-clamp-2">
-              {event.description}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Calendar className="w-4 h-4" />
-                <span>{format(new Date(event.event_date), 'PPP')}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Clock className="w-4 h-4" />
-                <span>{format(new Date(event.event_date), 'p')}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <MapPin className="w-4 h-4" />
-                <span>{event.location}</span>
-              </div>
-              {event.max_participants && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Users className="w-4 h-4" />
-                  <span>
-                    {event.registrations_count || 0} / {event.max_participants} registered
-                  </span>
-                </div>
-              )}
-            </div>
-
-            <Button
-              variant="secondary"
-              className="w-full mt-4"
-            >
-              View Details
-              <ChevronRight className="w-4 h-4 ml-2" />
-            </Button>
-          </CardContent>
-        </Card>
-      </Link>
-    </motion.div>
+          )}
+        </div>
+        <div className="mt-4 pt-4 border-t flex items-center justify-between">
+          <Badge
+            variant="secondary"
+            className={eventCategoryColors[event.category]}
+          >
+            {event.category}
+          </Badge>
+          {event.organizer && (
+            <span className="text-sm text-gray-600">
+              by {event.organizer.full_name}
+            </span>
+          )}
+        </div>
+      </div>
+    </Link>
   );
 } 

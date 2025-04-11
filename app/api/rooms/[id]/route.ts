@@ -52,6 +52,58 @@ export async function GET(
       );
     }
 
+    // Get maintenance requests for this room
+    const { data: maintenanceRequests } = await supabase
+      .from('maintenance_requests')
+      .select(`
+        id,
+        issue_type,
+        description,
+        priority,
+        status,
+        created_at,
+        student:students(
+          student_id,
+          user:users(
+            full_name,
+            email
+          )
+        ),
+        assigned_to:users(
+          id,
+          full_name,
+          email
+        )
+      `)
+      .eq('room_id', params.id);
+
+    // Get complaints for this room
+    const { data: complaints } = await supabase
+      .from('complaints')
+      .select(`
+        id,
+        complaint_type,
+        description,
+        severity,
+        status,
+        is_anonymous,
+        created_at,
+        resolution_notes,
+        student:students(
+          student_id,
+          user:users(
+            full_name,
+            email
+          )
+        ),
+        assigned_to:users(
+          id,
+          full_name,
+          email
+        )
+      `)
+      .eq('room_id', params.id);
+
     // Verify user is an admin of the institution
     const { data: admin } = await supabase
       .from('institution_admins')
@@ -74,7 +126,9 @@ export async function GET(
         .filter((allocation: RoomAllocation) => 
           allocation.status === 'active' && 
           (!allocation.end_date || new Date(allocation.end_date) > new Date())
-        )
+        ),
+      maintenance_requests: maintenanceRequests || [],
+      complaints: complaints || []
     };
 
     return NextResponse.json(room);

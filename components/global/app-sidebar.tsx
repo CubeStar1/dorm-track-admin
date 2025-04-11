@@ -2,18 +2,13 @@
 
 import { 
   LayoutDashboard,
-  BedDouble,
   Building2,
-  Wrench,
-  UtensilsCrossed,
-  Calendar,
   Users,
   Settings,
-  Shirt,
-  ShoppingBag,
-  Bell,
   User,
-  AlertTriangle
+  AlertTriangle,
+  School,
+  Home
 } from "lucide-react"
 import {
   Sidebar,
@@ -22,117 +17,89 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { NavSection } from "@/components/navigation/nav-section"
 import Link from "next/link"
-import { NavProfile } from "@/components/navigation/nav-profile";
+import { NavProfile } from "@/components/navigation/nav-profile"
 import useUser from "@/hooks/use-user"
-const USER_ROLES = {
-  STUDENT: 'student',
-  WARDEN: 'warden',
-  ADMIN: 'admin'
-} as const;
 
-type UserRole = (typeof USER_ROLES)[keyof typeof USER_ROLES];
-
-const isWarden = (role: UserRole): role is typeof USER_ROLES.WARDEN => 
-  role === USER_ROLES.WARDEN;
-
-const isAdmin = (role: UserRole): role is typeof USER_ROLES.ADMIN => 
-  role === USER_ROLES.ADMIN;
-
-
-const adminNavigationItems = [
+const navigationGroups = [
   {
-    title: "Dashboard",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-    description: "Overview of your hostel life",
+    label: "Overview",
+    items: [
+      {
+        title: "Dashboard",
+        href: "/dashboard",
+        icon: LayoutDashboard,
+        description: "Overview of your hostel life",
+      },
+    ]
   },
   {
-    title: "Hostels",
-    href: "/hostels",
-    icon: Building2,
-    description: "View all hostels",
+    label: "Hostel Management",
+    items: [
+      {
+        title: "Hostels",
+        href: "/admin/hostels",
+        icon: Building2,
+        description: "View and manage hostels",
+      },
+      {
+        title: "Rooms",
+        href: "/admin/rooms",
+        icon: Home,
+        description: "Room management",
+      },
+      {
+        title: "Complaints",
+        href: "/admin/complaints",
+        icon: AlertTriangle,
+        description: "View and manage complaints",
+      },
+    ]
   },
   {
-    title: "Rooms",
-    href: "/rooms",
-    icon: Building2,
-    description: "View all rooms",
-  },
-
-]
-
-const wardenNavigationItems = [
-  {
-    title: "Dashboard",
-    href: "/admin/dashboard",
-    icon: LayoutDashboard,
-    description: "Hostel management overview",
-  },
-  {
-    title: "Students",
-    href: "/admin/students",
-    icon: Users,
-    description: "Manage student records",
-  },
-  {
-    title: "Rooms",
-    href: "/admin/rooms",
-    icon: Building2,
-    description: "Room management",
+    label: "User Management",
+    items: [
+      {
+        title: "Institutions",
+        href: "/admin/institutions",
+        icon: School,
+        description: "Manage institution records",
+      },
+      {
+        title: "Students",
+        href: "/admin/students",
+        icon: School,
+        description: "Manage student records",
+      },
+      {
+        title: "Wardens",
+        href: "/admin/wardens",
+        icon: Users,
+        description: "Manage warden records",
+      },
+    ]
   },
   {
-    title: "Maintenance",
-    href: "/admin/maintenance",
-    icon: Wrench,
-    description: "Maintenance request management",
-  },
-  {
-    title: "Complaints",
-    href: "/admin/complaints",
-    icon: AlertTriangle,
-    description: "Complaint management",
-  },
-  {
-    title: "Mess Management",
-    href: "/admin/mess",
-    icon: UtensilsCrossed,
-    description: "Manage mess menu and feedback",
-  },
-  {
-    title: "Events",
-    href: "/admin/events",
-    icon: Calendar,
-    description: "Manage hostel events",
-  },
-  {
-    title: "Announcements",
-    href: "/admin/announcements",
-    icon: Bell,
-    description: "Post announcements",
-  },
-]
-
-const settingsItems = [
-  {
-    title: "Profile",
-    href: "/profile",
-    icon: User,
-    description: "Manage your profile",
-  },
-  {
-    title: "Settings",
-    href: "/settings",
-    icon: Settings,
-    description: "Account settings",
-  },
+    label: "Account",
+    items: [
+      {
+        title: "Profile",
+        href: "/admin/profile",
+        icon: User,
+        description: "Manage your profile",
+      },
+      {
+        title: "Settings",
+        href: "/settings",
+        icon: Settings,
+        description: "Account settings",
+      },
+    ]
+  }
 ]
 
 export function AppSidebar() {
-  // TODO: Get user role from auth context
-  const userRole: UserRole = USER_ROLES.ADMIN;
-  const {data: user} = useUser()
+  const { data: user } = useUser()
 
   return (
     <Sidebar className="">
@@ -147,22 +114,33 @@ export function AppSidebar() {
                 DormTrack
               </h1>
               <p className="text-sm text-muted-foreground">
-                {isAdmin(userRole) ? 'Admin Portal' : 'Student Portal'}
+                Admin Portal
               </p>
             </div>
           </Link>
         </div>
       </SidebarHeader>
       <SidebarContent className="bg-gradient-to-b from-background/80 to-background/20 dark:from-background/60 dark:to-background/0">
-        <div className="space-y-4 py-4">
-          <NavSection 
-            label="Navigation"
-            items={isAdmin(userRole) ? adminNavigationItems : isWarden(userRole) ? wardenNavigationItems : []}
-          />
-          <NavSection 
-            label="Account"
-            items={settingsItems}
-          />
+        <div className="space-y-6 py-4">
+          {navigationGroups.map((group, index) => (
+            <div key={index} className="px-3 py-2">
+              <h2 className="mb-2 px-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                {group.label}
+              </h2>
+              <div className="space-y-1">
+                {group.items.map((item, itemIndex) => (
+                  <Link
+                    key={itemIndex}
+                    href={item.href}
+                    className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+                  >
+                    <item.icon className="h-4 w-4" />
+                    {item.title}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </SidebarContent>
       <SidebarRail className="" />

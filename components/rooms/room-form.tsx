@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { Room } from '@/lib/api/services/rooms';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   Form,
   FormControl,
@@ -43,6 +44,7 @@ type RoomFormData = z.infer<typeof roomSchema>;
 interface RoomFormProps {
   room?: Room;
   hostelId: string;
+  onSuccess?: () => void;
 }
 
 const AMENITIES_OPTIONS = [
@@ -56,8 +58,10 @@ const AMENITIES_OPTIONS = [
   'WiFi'
 ];
 
-export function RoomForm({ room, hostelId }: RoomFormProps) {
+export function RoomForm({ room, hostelId, onSuccess }: RoomFormProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
+
   const form = useForm<RoomFormData>({
     resolver: zodResolver(roomSchema),
     defaultValues: room || {
@@ -94,8 +98,15 @@ export function RoomForm({ room, hostelId }: RoomFormProps) {
         throw new Error(error.error || 'Failed to save room');
       }
 
+      // Invalidate relevant queries
+      await queryClient.invalidateQueries({ queryKey: ['rooms'] });
+      if (room) {
+        await queryClient.invalidateQueries({ queryKey: ['room', room.id] });
+      }
+      await queryClient.invalidateQueries({ queryKey: ['hostel', hostelId] });
+
       toast.success(room ? 'Room updated successfully' : 'Room created successfully');
-      router.push('/admin/rooms');
+      onSuccess?.();
       router.refresh();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to save room');

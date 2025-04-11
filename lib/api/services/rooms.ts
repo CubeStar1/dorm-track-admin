@@ -31,6 +31,8 @@ export interface Room {
   description: string;
   images: string[];
   allocations?: RoomAllocation[];
+  maintenance_requests?: MaintenanceRequest[];
+  complaints?: Complaint[];
 }
 
 export interface RoomAllocation {
@@ -57,6 +59,50 @@ export interface RoomFilters {
   status?: Room['status'];
   hostelId?: string;
   institutionId?: string;
+}
+
+export interface MaintenanceRequest {
+  id: string;
+  issue_type: string;
+  description: string;
+  priority: string;
+  status: string;
+  created_at: string;
+  student: {
+    student_id: string;
+    user: {
+      full_name: string;
+      email: string;
+    };
+  };
+  assigned_to?: {
+    id: string;
+    full_name: string;
+    email: string;
+  };
+}
+
+export interface Complaint {
+  id: string;
+  complaint_type: string;
+  description: string;
+  severity: string;
+  status: string;
+  is_anonymous: boolean;
+  created_at: string;
+  resolution_notes?: string;
+  student: {
+    student_id: string;
+    user: {
+      full_name: string;
+      email: string;
+    };
+  };
+  assigned_to?: {
+    id: string;
+    full_name: string;
+    email: string;
+  };
 }
 
 export const roomService = {

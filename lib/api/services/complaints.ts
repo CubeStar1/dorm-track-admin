@@ -1,9 +1,37 @@
-
-import { Room } from '@/lib/api/services/rooms';
-
 export type ComplaintType = 'ragging' | 'harassment' | 'facilities' | 'mess' | 'other';
 export type ComplaintSeverity = 'low' | 'medium' | 'high';
-export type ComplaintStatus = 'pending' | 'in_progress' | 'resolved' | 'rejected';
+export type ComplaintStatus = 'pending' | 'investigating' | 'resolved' | 'dismissed';
+
+export interface Student {
+  student_id: string;
+  user: {
+    full_name: string;
+    email: string;
+    phone?: string;
+  };
+}
+
+export interface Hostel {
+  id: string;
+  name: string;
+  code: string;
+  address: string;
+}
+
+export interface Room {
+  id: string;
+  room_number: string;
+  block: string;
+  floor: number;
+  room_type: string;
+}
+
+export interface AssignedStaff {
+  id: string;
+  full_name: string;
+  email: string;
+  phone?: string;
+}
 
 export interface Complaint {
   id: string;
@@ -16,17 +44,14 @@ export interface Complaint {
   is_anonymous: boolean;
   student_id: string;
   hostel_id: string;
+  room_id?: string;
   assigned_to?: string;
   resolution_notes?: string;
-  hostel?: {
-    id: string;
-    name: string;
-  };
-  assigned_staff?: {
-    id: string;
-    full_name: string;
-    email: string;
-  };
+  institution_id: string;
+  student?: Student;
+  hostel?: Hostel;
+  room?: Room;
+  assigned_staff?: AssignedStaff;
 }
 
 export interface CreateComplaintPayload {
@@ -39,6 +64,7 @@ export interface CreateComplaintPayload {
 export interface UpdateComplaintPayload {
   status: ComplaintStatus;
   resolution_notes?: string;
+  assigned_to?: string;
 }
 
 class ComplaintsService {
@@ -67,7 +93,8 @@ class ComplaintsService {
       body: JSON.stringify(data),
     });
     if (!response.ok) {
-      throw new Error('Failed to create complaint');
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to create complaint');
     }
     return response.json();
   }
@@ -81,7 +108,8 @@ class ComplaintsService {
       body: JSON.stringify(data),
     });
     if (!response.ok) {
-      throw new Error('Failed to update complaint');
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to update complaint');
     }
     return response.json();
   }
