@@ -1,12 +1,12 @@
 import { createSupabaseServer } from '@/lib/supabase/server';
-import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
+// GET /api/maintenance - Get all maintenance requests
 export async function GET(request: Request) {
   try {
     const supabase = await createSupabaseServer();
-    
-    // Get the current user's session
+
+    // Verify authentication
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     if (sessionError || !session) {
       return NextResponse.json(
@@ -15,33 +15,62 @@ export async function GET(request: Request) {
       );
     }
 
-    // Get the user's student record
-    const { data: studentData, error: studentError } = await supabase
-      .from('students')
-      .select('user_id, hostel_id')
-      .eq('user_id', session.user.id)
+    // Get user's role and institution
+    const { data: user } = await supabase
+      .from('users')
+      .select('role, institution_id')
+      .eq('id', session.user.id)
       .single();
 
-    if (studentError) {
+    if (!user) {
       return NextResponse.json(
-        { error: 'Student record not found' },
+        { error: 'User not found' },
         { status: 404 }
       );
     }
 
-    // Get maintenance requests for the student with expanded data
-    const { data: requests, error: requestsError } = await supabase
+    let query = supabase
       .from('maintenance_requests')
       .select(`
         *,
-        hostel:hostels(id, name),
-        room:rooms(id, room_number),
-        assigned_to:users(id, full_name, email)
-      `)
-      .eq('student_id', studentData.user_id)
-      .order('created_at', { ascending: false });
+        student:students(
+          student_id,
+          user:users(
+            full_name,
+            email
+          )
+        ),
+        hostel:hostels(
+          id,
+          name,
+          code,
+          institution_id
+        ),
+        room:rooms(
+          id,
+          room_number,
+          block
+        ),
+        assigned_to:users(
+          id,
+          full_name,
+          email
+        )
+      `);
 
-    if (requestsError) {
+    // Filter based on user role
+    if (user.role === 'student') {
+      // Students can only see their own maintenance requests
+      query = query.eq('student_id', session.user.id);
+    } else {
+      // Admin and wardens can see requests from their institution
+      query = query.eq('hostel.institution_id', user.institution_id);
+    }
+
+    const { data: requests, error } = await query;
+
+    if (error) {
+      console.error('Error fetching maintenance requests:', error);
       return NextResponse.json(
         { error: 'Failed to fetch maintenance requests' },
         { status: 500 }
@@ -50,7 +79,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(requests);
   } catch (error) {
-    console.error('Error fetching maintenance requests:', error);
+    console.error('Maintenance requests fetch error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -58,17 +87,12 @@ export async function GET(request: Request) {
   }
 }
 
-interface MaintenanceRequestBody {
-  issueType: string;
-  description: string;
-  priority: 'low' | 'medium' | 'high';
-}
-
+// POST /api/maintenance - Create a new maintenance request
 export async function POST(request: Request) {
   try {
     const supabase = await createSupabaseServer();
-    
-    // Get the current user's session
+
+    // Verify authentication
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     if (sessionError || !session) {
       return NextResponse.json(
@@ -77,53 +101,45 @@ export async function POST(request: Request) {
       );
     }
 
-    // Get the user's student record
-    const { data: studentData, error: studentError } = await supabase
+    // Get the student's information
+    const { data: student } = await supabase
       .from('students')
-      .select('user_id, hostel_id, room_id')
+      .select('*')
       .eq('user_id', session.user.id)
       .single();
 
-    if (studentError) {
+    if (!student) {
       return NextResponse.json(
-        { error: 'Student record not found' },
-        { status: 404 }
+        { error: 'Only students can create maintenance requests' },
+        { status: 403 }
       );
     }
 
-    const requestBody: MaintenanceRequestBody = await request.json();
-    const { issueType, description, priority } = requestBody;
+    const data = await request.json();
 
-    // Create the maintenance request
-    const { data: maintenanceRequest, error: requestError } = await supabase
+    const { data: request_data, error } = await supabase
       .from('maintenance_requests')
       .insert({
-        hostel_id: studentData.hostel_id,
-        student_id: studentData.user_id,
-        room_id: studentData.room_id,
-        issue_type: issueType,
-        description,
-        priority,
+        ...data,
+        student_id: session.user.id,
+        hostel_id: student.hostel_id,
+        room_id: student.room_id,
         status: 'pending'
       })
-      .select(`
-        *,
-        hostel:hostels(id, name),
-        room:rooms(id, room_number),
-        assigned_to:users(id, full_name, email)
-      `)
+      .select()
       .single();
 
-    if (requestError) {
+    if (error) {
+      console.error('Error creating maintenance request:', error);
       return NextResponse.json(
-        { error: 'Failed to create maintenance request ' + requestError.message },
+        { error: 'Failed to create maintenance request' },
         { status: 500 }
       );
     }
 
-    return NextResponse.json(maintenanceRequest);
+    return NextResponse.json(request_data);
   } catch (error) {
-    console.error('Error creating maintenance request:', error);
+    console.error('Maintenance request creation error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

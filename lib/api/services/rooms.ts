@@ -24,7 +24,7 @@ export interface Room {
   floor: number;
   capacity: number;
   current_occupancy: number;
-  room_type: 'Single' | 'Double' | 'Triple';
+  room_type: string;
   amenities: string[];
   status: 'available' | 'occupied' | 'maintenance';
   price: number;
@@ -33,6 +33,8 @@ export interface Room {
   allocations?: RoomAllocation[];
   maintenance_requests?: MaintenanceRequest[];
   complaints?: Complaint[];
+  created_at: string;
+  updated_at: string;
 }
 
 export interface RoomAllocation {

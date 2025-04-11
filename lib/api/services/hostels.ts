@@ -3,16 +3,11 @@ import { api } from '../axios';
 
 export interface Hostel {
   id: string;
-  institution_id: string;
   name: string;
   code: string;
   address: string;
-  city: string;
-  state: string;
-  contact_email: string;
-  contact_phone: string;
-  total_blocks: number;
-  total_rooms: number;
+  warden_id?: string;
+  institution_id: string;
   created_at: string;
   updated_at: string;
 }

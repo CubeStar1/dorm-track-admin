@@ -139,6 +139,7 @@ create table public.maintenance_requests (
     priority text default 'medium', -- 'low', 'medium', 'high'
     status text default 'pending', -- 'pending', 'in_progress', 'completed'
     assigned_to uuid references public.users,
+    resolution_notes text,
     created_at timestamp with time zone default timezone('utc'::text, now()) not null,
     updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );

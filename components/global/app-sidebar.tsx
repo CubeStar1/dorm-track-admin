@@ -8,7 +8,9 @@ import {
   User,
   AlertTriangle,
   School,
-  Home
+  Home,
+  Calendar,
+  Wrench
 } from "lucide-react"
 import {
   Sidebar,
@@ -53,6 +55,18 @@ const navigationGroups = [
         href: "/admin/complaints",
         icon: AlertTriangle,
         description: "View and manage complaints",
+      },
+      {
+        title: "Maintenance",
+        href: "/admin/maintenance",
+        icon: Wrench,
+        description: "View and manage maintenance requests",
+      },  
+      {
+        title: "Events",
+        href: "/admin/events",
+        icon: Calendar,
+        description: "View and manage events",
       },
     ]
   },
