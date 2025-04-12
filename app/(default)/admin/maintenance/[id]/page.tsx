@@ -36,6 +36,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { use } from 'react';
 
 const statusColors = {
   pending: 'bg-yellow-500',
@@ -74,21 +75,22 @@ const issueTypeLabels = {
 export default function MaintenanceDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [status, setStatus] = useState<MaintenanceStatus>();
   const [resolutionNotes, setResolutionNotes] = useState('');
+  const { id } = use(params);
 
   const { data: request, isLoading } = useQuery({
-    queryKey: ['maintenance', params.id],
-    queryFn: () => maintenanceService.getRequest(params.id),
+    queryKey: ['maintenance', id],
+    queryFn: () => maintenanceService.getRequest(id),
   });
 
   const updateRequestMutation = useMutation({
     mutationFn: (data: { status: MaintenanceStatus; resolution_notes?: string }) =>
-      maintenanceService.updateRequest(params.id, data),
+      maintenanceService.updateRequest(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['maintenance'] });
       toast.success('Maintenance request status updated successfully');

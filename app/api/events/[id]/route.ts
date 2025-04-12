@@ -4,9 +4,10 @@ import { NextResponse } from 'next/server';
 // GET /api/events/[id] - Get a single event
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createSupabaseServer();
 
     // Verify authentication
@@ -58,7 +59,7 @@ export async function GET(
           )
         )
       `)
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('institution_id', user.institution_id)
       .single();
 
@@ -109,9 +110,10 @@ export async function GET(
 // PATCH /api/events/[id] - Update an event
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createSupabaseServer();
 
     // Verify authentication
@@ -127,7 +129,7 @@ export async function PATCH(
     const { data: event } = await supabase
       .from('events')
       .select('organizer_id')
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
 
     if (!event) {
@@ -163,7 +165,7 @@ export async function PATCH(
     const { data: updatedEvent, error } = await supabase
       .from('events')
       .update(data)
-      .eq('id', params.id)
+      .eq('id', id)
       .select(`
         *,
         organizer:users(
@@ -196,9 +198,10 @@ export async function PATCH(
 // DELETE /api/events/[id] - Delete an event
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createSupabaseServer();
 
     // Verify authentication
@@ -214,7 +217,7 @@ export async function DELETE(
     const { data: event } = await supabase
       .from('events')
       .select('organizer_id')
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
 
     if (!event) {
@@ -248,7 +251,7 @@ export async function DELETE(
     const { error } = await supabase
       .from('events')
       .delete()
-      .eq('id', params.id);
+      .eq('id', id);
 
     if (error) {
       console.error('Error deleting event:', error);

@@ -13,17 +13,19 @@ import { LocationInfo } from '@/components/students/location-info';
 import { MaintenanceRequests } from '@/components/students/maintenance-requests';
 import { Complaints } from '@/components/students/complaints';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { use } from 'react';
 
 export default function StudentDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const router = useRouter();
+  const { id } = use(params);
 
   const { data: student, isLoading } = useQuery({
-    queryKey: ['student', params.id],
-    queryFn: () => studentsService.getStudent(params.id),
+    queryKey: ['student', id],
+    queryFn: () => studentsService.getStudent(id),
   });
 
   if (isLoading) {

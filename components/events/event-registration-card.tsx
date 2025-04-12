@@ -46,7 +46,7 @@ export function EventRegistrationCard({
           <div>
             <p className="font-medium">Participants</p>
             <p className="text-sm text-muted-foreground">
-              {event.registrations_count || 0}
+              {event.registration_count || 0}
               {event.max_participants ? ` / ${event.max_participants}` : ''} registered
             </p>
           </div>

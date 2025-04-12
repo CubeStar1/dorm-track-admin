@@ -4,9 +4,10 @@ import { NextResponse } from 'next/server';
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createSupabaseServer();
 
     // Get the current user
@@ -36,7 +37,7 @@ export async function GET(
     }
 
     // If user is an institution admin, they can only view their own institution
-    if (userData.role === 'institution_admin' && userData.institution_id !== params.id) {
+    if (userData.role === 'institution_admin' && userData.institution_id !== id) {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }
@@ -107,7 +108,7 @@ export async function GET(
           )
         )
       `)
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
 
     if (error) {
@@ -128,9 +129,11 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const {id} = await params;
+
     const supabase = await createSupabaseServer();
 
     // Get the current user
@@ -160,7 +163,7 @@ export async function PATCH(
     }
 
     // If user is an institution admin, they can only update their own institution
-    if (userData.role === 'institution_admin' && userData.institution_id !== params.id) {
+    if (userData.role === 'institution_admin' && userData.institution_id !== id) {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }
@@ -173,7 +176,7 @@ export async function PATCH(
     const { error } = await supabase
       .from('institutions')
       .update(body)
-      .eq('id', params.id);
+      .eq('id', id);
 
     if (error) {
       return NextResponse.json(

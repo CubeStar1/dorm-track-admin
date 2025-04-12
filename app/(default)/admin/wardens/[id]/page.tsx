@@ -7,22 +7,24 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { use } from 'react';
 
 export default function WardenDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { id } = use(params);
 
   const { data: warden, isLoading } = useQuery({
-    queryKey: ['wardens', params.id],
-    queryFn: () => wardensService.getWarden(params.id),
+    queryKey: ['wardens', id],
+    queryFn: () => wardensService.getWarden(id),
   });
 
   const deleteMutation = useMutation({
-    mutationFn: () => wardensService.deleteWarden(params.id),
+    mutationFn: () => wardensService.deleteWarden(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['wardens'] });
       toast.success('Warden deleted successfully');
@@ -54,7 +56,7 @@ export default function WardenDetailPage({
 
       <WardenDetails
         warden={warden}
-        onEdit={() => router.push(`/admin/wardens/${params.id}/edit`)}
+        onEdit={() => router.push(`/admin/wardens/${id}/edit`)}
         onDelete={() => {
           if (confirm('Are you sure you want to delete this warden?')) {
             deleteMutation.mutate();

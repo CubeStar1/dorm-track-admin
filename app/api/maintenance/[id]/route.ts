@@ -10,9 +10,10 @@ const updateMaintenanceSchema = z.object({
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createSupabaseServer();
 
     // Verify authentication
@@ -67,7 +68,7 @@ export async function GET(
           email
         )
       `)
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
 
     const { data: request, error } = await query;
@@ -107,9 +108,11 @@ export async function GET(
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const {id} = await params;
+
     const supabase = await createSupabaseServer();
 
     // Verify authentication
@@ -146,7 +149,7 @@ export async function PATCH(
         *,
         hostel:hostels(institution_id)
       `)
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
 
     if (!existingRequest) {
@@ -180,7 +183,7 @@ export async function PATCH(
         ...(assigned_staff_id && { assigned_staff_id }),
         updated_at: new Date().toISOString(),
       })
-      .eq('id', params.id)
+      .eq('id', id)
       .select(`
         *,
         student:students(

@@ -1,8 +1,12 @@
 import { PricingSection } from "@/components/landing/pricing-section"
 
-export const PAYMENT_FREQUENCIES = ["monthly", "yearly"]
 
-export const TIERS = [
+
+export default function PricingPage() {
+
+ const PAYMENT_FREQUENCIES : string[] = ["monthly", "yearly"] as const;
+
+ const TIERS = [
   {
     id: "starter",
     name: "STARTER",
@@ -85,8 +89,6 @@ export const TIERS = [
     highlighted: true,
   },
 ]
-
-export default function PricingPage() {
   return (
     <div className="relative flex justify-center items-center w-full ">
       <div className="absolute inset-0 -z-10">

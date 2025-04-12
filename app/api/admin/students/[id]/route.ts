@@ -4,9 +4,10 @@ import { NextResponse } from 'next/server';
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createSupabaseServer();
 
     // Get the current user's institution ID
@@ -109,7 +110,7 @@ export async function GET(
           )
         )
       `)
-      .eq('user_id', params.id)
+      .eq('user_id', id)
       .eq('institution_id', admin.institution_id)
       .single();
 
@@ -144,9 +145,11 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const {id} = await params;
+
     const supabase = await createSupabaseServer();
     const body = await request.json();
 
@@ -174,7 +177,7 @@ export async function PATCH(
         year_of_study: body.year_of_study,
         updated_at: new Date().toISOString()
       })
-      .eq('user_id', params.id)
+      .eq('user_id', id)
       .eq('institution_id', admin.institution_id);
 
     if (updateError) {
@@ -190,7 +193,7 @@ export async function PATCH(
         phone: body.phone,
         updated_at: new Date().toISOString()
       })
-      .eq('id', params.id);
+      .eq('id', id);
 
     if (userUpdateError) {
       console.error('Error updating user:', userUpdateError);

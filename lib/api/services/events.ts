@@ -36,7 +36,8 @@ export interface Event {
   updated_at: string
   organizer?: User
   registration_count?: number
-  registrations?: EventRegistration[]
+  registrations?: EventRegistration[],
+  is_registered?: boolean
 }
 
 export interface CreateEventPayload {

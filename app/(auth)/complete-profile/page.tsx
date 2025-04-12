@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { createSupabaseBrowser } from '@/lib/supabase/client';
 import { toast } from 'sonner';
+import {Suspense} from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   Form,
@@ -58,7 +59,7 @@ type RoleSelectionValues = z.infer<typeof roleSelectionSchema>;
 type AdminProfileValues = z.infer<typeof adminProfileSchema>;
 type WardenProfileValues = z.infer<typeof wardenProfileSchema>;
 
-export default function CompleteProfilePage() {
+function CompleteProfilePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextUrl = searchParams.get('next') || '/dashboard';
@@ -417,3 +418,12 @@ export default function CompleteProfilePage() {
     </div>
   );
 } 
+
+// Wrap the component in Suspense
+const CompleteProfileWrapper = () => (
+  <Suspense fallback={<div>Loading...</div>}>
+    <CompleteProfilePage />
+  </Suspense>
+);
+
+export default CompleteProfileWrapper; 

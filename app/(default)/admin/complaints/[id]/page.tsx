@@ -34,7 +34,7 @@ import {
   Clock
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { use, useState } from 'react';
 import { toast } from 'sonner';
 
 const statusColors: Record<ComplaintStatus, string> = {
@@ -74,21 +74,22 @@ const severityBgColors = {
 export default function ComplaintDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [status, setStatus] = useState<ComplaintStatus>();
   const [resolutionNotes, setResolutionNotes] = useState('');
+  const {id}  = use(params)
 
   const { data: complaint, isLoading } = useQuery({
-    queryKey: ['complaints', params.id],
-    queryFn: () => complaintsService.getComplaint(params.id),
+    queryKey: ['complaints', id],
+    queryFn: () => complaintsService.getComplaint(id),
   });
 
   const updateComplaintMutation = useMutation({
     mutationFn: (data: { status: ComplaintStatus; resolution_notes?: string }) =>
-      complaintsService.updateComplaint(params.id, data),
+      complaintsService.updateComplaint(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['complaints'] });
       toast.success('Complaint status updated successfully');

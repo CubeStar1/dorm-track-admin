@@ -6,9 +6,10 @@ import { EventDetails } from '@/components/events/event-details';
 import { EventRegistrations } from '@/components/events/event-registrations';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Pencil, Trash2 } from 'lucide-react';
+import { use } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,18 +22,21 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-export default function EventPage() {
-  const params = useParams();
+export default function EventPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const router = useRouter();
-  const eventId = params.id as string;
+  const { id } = use(params);
 
   const { data: event, isLoading } = useQuery({
-    queryKey: ['events', eventId],
-    queryFn: () => eventsService.getEvent(eventId),
+    queryKey: ['events', id],
+    queryFn: () => eventsService.getEvent(id),
   });
 
   const deleteEvent = useMutation({
-    mutationFn: () => eventsService.deleteEvent(eventId),
+    mutationFn: () => eventsService.deleteEvent(id),
     onSuccess: () => {
       router.push('/admin/events');
     },
@@ -83,7 +87,7 @@ export default function EventPage() {
             variant="outline"
             size="sm"
             className="gap-2"
-            onClick={() => router.push(`/admin/events/${eventId}/edit`)}
+            onClick={() => router.push(`/admin/events/${id}/edit`)}
           >
             <Pencil className="h-4 w-4" />
             Edit

@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import * as z from 'zod';
 import { useInstitution } from '@/lib/hooks/use-institution';
 import { Skeleton } from '@/components/ui/skeleton';
+import { use } from 'react';
 
 type Hostel = {
   id: string;
@@ -34,15 +35,16 @@ type FormData = z.infer<typeof formSchema>;
 export default function EditWardenPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { institutionId, isLoading: isLoadingInstitution } = useInstitution();
+  const { id } = use(params);
 
   const { data: warden, isLoading: isLoadingWarden } = useQuery<Warden>({
-    queryKey: ['wardens', params.id],
-    queryFn: () => wardensService.getWarden(params.id),
+    queryKey: ['wardens', id],
+    queryFn: () => wardensService.getWarden(id),
   });
 
   const { data: hostels, isLoading: isLoadingHostels } = useQuery<Hostel[]>({
@@ -71,12 +73,12 @@ export default function EditWardenPage({
         hostel_id: data.hostel_id,
         assigned_blocks: data.assigned_blocks,
       };
-      return wardensService.updateWarden(params.id, updateData);
+      return wardensService.updateWarden(id, updateData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['wardens'] });
       toast.success('Warden updated successfully');
-      router.push(`/admin/wardens/${params.id}`);
+      router.push(`/admin/wardens/${id}`);
     },
     onError: (error: Error) => {
       toast.error(error.message);

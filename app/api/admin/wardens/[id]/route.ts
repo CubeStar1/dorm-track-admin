@@ -4,9 +4,10 @@ import { NextResponse } from 'next/server';
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createSupabaseServer();
 
     // Get the current user's institution ID
@@ -51,7 +52,7 @@ export async function GET(
           total_rooms
         )
       `)
-      .eq('user_id', params.id)
+      .eq('user_id', id)
       .eq('institution_id', institutionData.institution_id)
       .single();
 
@@ -76,9 +77,12 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
+
 ) {
   try {
+    const {id} = await params;
+
     const supabase = await createSupabaseServer();
     const body = await request.json();
 
@@ -108,7 +112,7 @@ export async function PATCH(
           phone: body.user.phone,
           gender: body.user.gender
         })
-        .eq('id', params.id);
+        .eq('id', id);
 
       if (userError) {
         console.error('Error updating user:', userError);
@@ -125,7 +129,7 @@ export async function PATCH(
           hostel_id: body.hostel_id,
           assigned_blocks: body.assigned_blocks
         })
-        .eq('user_id', params.id)
+        .eq('user_id', id)
         .eq('institution_id', institutionData.institution_id);
 
       if (wardenError) {
@@ -160,7 +164,7 @@ export async function PATCH(
           total_rooms
         )
       `)
-      .eq('user_id', params.id)
+      .eq('user_id', id)
       .single();
 
     if (fetchError) {
@@ -180,9 +184,11 @@ export async function PATCH(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
+
     const supabase = await createSupabaseServer();
 
     // Get the current user's institution ID
@@ -205,7 +211,7 @@ export async function DELETE(
     const { error: wardenError } = await supabase
       .from('wardens')
       .delete()
-      .eq('user_id', params.id)
+      .eq('user_id', id)
       .eq('institution_id', institutionData.institution_id);
 
     if (wardenError) {
@@ -217,7 +223,7 @@ export async function DELETE(
     const { error: userError } = await supabase
       .from('users')
       .delete()
-      .eq('id', params.id);
+      .eq('id', id);
 
     if (userError) {
       console.error('Error deleting user:', userError);
@@ -225,7 +231,7 @@ export async function DELETE(
     }
 
     // Delete the auth user
-    const { error: authError } = await supabase.auth.admin.deleteUser(params.id);
+    const { error: authError } = await supabase.auth.admin.deleteUser(id);
     if (authError) {
       console.error('Error deleting auth user:', authError);
       return NextResponse.json({ error: 'Failed to delete auth user' }, { status: 500 });

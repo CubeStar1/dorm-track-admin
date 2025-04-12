@@ -31,7 +31,7 @@ const roomSchema = z.object({
   block: z.string().min(1, 'Block is required'),
   floor: z.number().min(0, 'Floor must be 0 or greater'),
   capacity: z.number().min(1, 'Capacity must be at least 1'),
-  room_type: z.enum(['Single', 'Double', 'Triple']),
+  room_type: z.string(),
   amenities: z.array(z.string()),
   status: z.enum(['available', 'occupied', 'maintenance']),
   price: z.number().min(0, 'Price must be 0 or greater'),

@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { useParams } from 'next/navigation';
+import { use } from 'react';
 import { roomService } from '@/lib/api/services/rooms';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -11,13 +11,16 @@ import { RoomDetails } from '@/components/rooms/room-details';
 import { MaintenanceRequests } from '@/components/rooms/maintenance-requests';
 import { Complaints } from '@/components/rooms/complaints';
 
-export default function RoomDetailsPage() {
-  const params = useParams();
-  const roomId = params.id as string;
+export default function RoomDetailsPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = use(params);
 
   const { data: room, isLoading } = useQuery({
-    queryKey: ['room', roomId],
-    queryFn: () => roomService.getRoom(roomId)
+    queryKey: ['room', id],
+    queryFn: () => roomService.getRoom(id)
   });
 
   if (isLoading) {

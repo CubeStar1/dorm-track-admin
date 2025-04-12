@@ -1,27 +1,31 @@
 'use client';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { roomService } from '@/lib/api/services/rooms';
 import { RoomForm } from '@/components/rooms/room-form';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ArrowLeft, BedDouble } from 'lucide-react';
+import { use } from 'react';
 
-export default function EditRoomPage() {
-  const params = useParams();
+export default function EditRoomPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const router = useRouter();
-  const roomId = params.id as string;
+  const { id } = use(params);
 
   const { data: room, isLoading } = useQuery({
-    queryKey: ['room', roomId],
-    queryFn: () => roomService.getRoom(roomId),
+    queryKey: ['room', id],
+    queryFn: () => roomService.getRoom(id),
     staleTime: 0,
     refetchOnMount: true
   });
 
   const handleSuccess = () => {
-    router.push(`/admin/rooms/${roomId}`);
+    router.push(`/admin/rooms/${id}`);
   };
 
   if (isLoading) {
@@ -56,7 +60,7 @@ export default function EditRoomPage() {
             className="gap-2"
             asChild
           >
-            <Link href={`/admin/rooms/${roomId}`}>
+            <Link href={`/admin/rooms/${id}`}>
               <ArrowLeft className="w-4 h-4" />
               Back to Room Details
             </Link>

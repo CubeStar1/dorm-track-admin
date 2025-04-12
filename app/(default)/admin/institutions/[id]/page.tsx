@@ -11,26 +11,27 @@ import { Institution, institutionsService } from '@/lib/api/services/institution
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Edit } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { use, useState } from 'react';
 import { toast } from 'sonner';
 
 export default function InstitutionDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const {id} = use(params);
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
 
   const { data: institution, isLoading } = useQuery({
-    queryKey: ['institutions', params.id],
-    queryFn: () => institutionsService.getInstitution(params.id),
+    queryKey: ['institutions', id],
+    queryFn: () => institutionsService.getInstitution(id),
   });
 
   const updateInstitutionMutation = useMutation({
     mutationFn: (data: Partial<Institution>) =>
-      institutionsService.updateInstitution(params.id, data),
+      institutionsService.updateInstitution(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['institutions'] });
       toast.success('Institution updated successfully');

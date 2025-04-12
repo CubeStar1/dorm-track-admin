@@ -4,9 +4,10 @@ import { NextResponse } from 'next/server';
 // GET /api/complaints/[id] - Get a single complaint
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createSupabaseServer();
 
     // Verify authentication
@@ -66,7 +67,7 @@ export async function GET(
           phone
         )
       `)
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
 
     if (error || !complaint) {
@@ -106,9 +107,10 @@ export async function GET(
 // PATCH /api/complaints/[id] - Update a complaint
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createSupabaseServer();
 
     // Verify authentication
@@ -153,7 +155,7 @@ export async function PATCH(
           institution_id
         )
       `)
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
 
     if (!complaint || complaint.hostel.institution_id !== user.institution_id) {
@@ -172,7 +174,7 @@ export async function PATCH(
         assigned_to: data.assigned_to || session.user.id,
         updated_at: new Date().toISOString()
       })
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single();
 

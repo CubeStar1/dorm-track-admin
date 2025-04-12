@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useParams } from 'next/navigation';
+import { use } from 'react';
 import { hostelService } from '@/lib/api/services/hostels';
 import { useInstitution } from '@/lib/hooks/use-institution';
 import { Button } from '@/components/ui/button';
@@ -12,23 +12,28 @@ import { RoomList } from '@/components/rooms/room-list';
 import { EditHostelDialog } from '@/components/hostels/edit-hostel-dialog';
 import { Building2, MapPin, Mail, Phone, Users2, Home, Pencil, UtensilsCrossed } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-export default function HostelDetailsPage() {
-  const params = useParams();
-  const hostelId = params.id as string;
+
+export default function HostelDetailsPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = use(params);
   const queryClient = useQueryClient();
   const { institutionId, isLoading: isLoadingInstitution } = useInstitution();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const router = useRouter();
+
   const { data: hostel, isLoading: isLoadingHostel } = useQuery({
-    queryKey: ['hostel', hostelId],
-    queryFn: () => hostelService.getHostel(hostelId),
+    queryKey: ['hostel', id],
+    queryFn: () => hostelService.getHostel(id),
     staleTime: 0, // Consider data stale immediately
     refetchOnMount: true // Refetch when component mounts
   });
 
   const handleEditSuccess = () => {
     // Invalidate both the individual hostel and the hostels list queries
-    queryClient.invalidateQueries({ queryKey: ['hostel', hostelId] });
+    queryClient.invalidateQueries({ queryKey: ['hostel', id] });
     queryClient.invalidateQueries({ queryKey: ['hostels'] });
     setIsEditDialogOpen(false);
   };
@@ -134,7 +139,7 @@ export default function HostelDetailsPage() {
           </TabsContent>
 
           <TabsContent value="rooms">
-            <RoomList hostelId={hostelId} />
+            <RoomList hostelId={id} />
           </TabsContent>
 
           <TabsContent value="mess-menu">
@@ -144,7 +149,7 @@ export default function HostelDetailsPage() {
                   <h2 className="text-2xl font-semibold">Mess Menu</h2>
                   <p className="text-sm text-muted-foreground">Manage the hostel's mess menu</p>
                 </div>
-                <Button className="gap-2" onClick={() => router.push(`/admin/hostels/${hostelId}/mess-menu`)}>
+                <Button className="gap-2" onClick={() => router.push(`/admin/hostels/${id}/mess-menu`)}>
                   <UtensilsCrossed className="w-4 h-4" />
                   Manage Menu
                 </Button>

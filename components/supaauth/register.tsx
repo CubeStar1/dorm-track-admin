@@ -1,12 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import SignUp from "./signup";
 import Social from "./social";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 
-export default function Register() {
+const Register = () => {
   const searchParams = useSearchParams();
   const next = searchParams.get("next") || "/";
   const verify = searchParams.get("verify");
@@ -39,4 +39,13 @@ export default function Register() {
       </div>
     </div>
   );
-}
+};
+
+// Wrap the Register component in Suspense
+const RegisterWrapper = () => (
+  <Suspense fallback={<div>Loading...</div>}>
+    <Register />
+  </Suspense>
+);
+
+export default RegisterWrapper;

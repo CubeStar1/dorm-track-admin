@@ -4,9 +4,10 @@ import { NextResponse } from 'next/server';
 // GET /api/hostels/[id] - Get a single hostel
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createSupabaseServer();
 
     // Verify authentication
@@ -36,7 +37,7 @@ export async function GET(
         created_at,
         updated_at
       `)
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
 
     if (hostelError || !hostel) {
@@ -75,9 +76,10 @@ export async function GET(
 // PATCH /api/hostels/[id] - Update a hostel
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createSupabaseServer();
 
     // Verify authentication
@@ -93,7 +95,7 @@ export async function PATCH(
     const { data: hostel } = await supabase
       .from('hostels')
       .select('institution_id')
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
 
     if (!hostel) {
@@ -134,7 +136,7 @@ export async function PATCH(
         total_blocks: data.total_blocks,
         total_rooms: data.total_rooms
       })
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single();
 
@@ -159,9 +161,10 @@ export async function PATCH(
 // DELETE /api/hostels/[id] - Delete a hostel
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createSupabaseServer();
 
     // Verify authentication
@@ -177,7 +180,7 @@ export async function DELETE(
     const { data: hostel } = await supabase
       .from('hostels')
       .select('institution_id')
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
 
     if (!hostel) {
@@ -206,7 +209,7 @@ export async function DELETE(
     const { error: deleteError } = await supabase
       .from('hostels')
       .delete()
-      .eq('id', params.id);
+      .eq('id', id);
 
     if (deleteError) {
       console.error('Error deleting hostel:', deleteError);

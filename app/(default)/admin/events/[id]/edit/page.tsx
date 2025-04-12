@@ -1,6 +1,6 @@
 'use client';
 
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { eventsService } from '@/lib/api/services/events';
 import { EventForm } from '@/components/events/event-form';
@@ -8,14 +8,19 @@ import { format } from 'date-fns';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { use } from 'react';
 
-export default function EditEventPage() {
-  const params = useParams<{ id: string }>();
+export default function EditEventPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const router = useRouter();
+  const { id } = use(params);
 
   const { data: event, isLoading } = useQuery({
-    queryKey: ['event', params.id],
-    queryFn: () => eventsService.getEvent(params.id),
+    queryKey: ['event', id],
+    queryFn: () => eventsService.getEvent(id),
   });
 
   if (isLoading) {

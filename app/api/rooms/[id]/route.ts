@@ -5,9 +5,10 @@ import { Room, RoomAllocation } from '@/lib/api/services/rooms';
 // GET /api/rooms/[id] - Get a single room
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createSupabaseServer();
 
     // Verify authentication
@@ -41,7 +42,7 @@ export async function GET(
           )
         )
       `)
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
 
     if (roomError || !roomData) {
@@ -75,7 +76,7 @@ export async function GET(
           email
         )
       `)
-      .eq('room_id', params.id);
+      .eq('room_id', id);
 
     // Get complaints for this room
     const { data: complaints } = await supabase
@@ -102,7 +103,7 @@ export async function GET(
           email
         )
       `)
-      .eq('room_id', params.id);
+      .eq('room_id', id);
 
     // Verify user is an admin of the institution
     const { data: admin } = await supabase
@@ -151,9 +152,10 @@ interface RoomWithHostel {
 // PATCH /api/rooms/[id] - Update a room
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createSupabaseServer();
 
     // Verify authentication
@@ -172,7 +174,7 @@ export async function PATCH(
         *,
         hostel:hostels!inner (*)
       `)
-      .eq('id', params.id)
+      .eq('id', id)
       .single() as { data: Room | null, error: any };
 
     if (!room) {
@@ -214,7 +216,7 @@ export async function PATCH(
         images: data.images,
         description: data.description
       })
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single() as { data: Room | null, error: any };
 
@@ -239,9 +241,10 @@ export async function PATCH(
 // DELETE /api/rooms/[id] - Delete a room
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createSupabaseServer();
 
     // Verify authentication
@@ -260,7 +263,7 @@ export async function DELETE(
         *,
         hostel:hostels!inner (*)
       `)
-      .eq('id', params.id)
+      .eq('id', id)
       .single() as { data: Room | null, error: any };
 
     if (!room) {
@@ -289,7 +292,7 @@ export async function DELETE(
     const { error: deleteError } = await supabase
       .from('rooms')
       .delete()
-      .eq('id', params.id);
+      .eq('id', id);
 
     if (deleteError) {
       console.error('Error deleting room:', deleteError);

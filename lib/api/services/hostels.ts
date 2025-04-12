@@ -6,6 +6,8 @@ export interface Hostel {
   name: string;
   code: string;
   address: string;
+  city?: string;
+  state?: string;
   warden_id?: string;
   institution_id: string;
   created_at: string;
