@@ -74,13 +74,7 @@ const navigationGroups = [
         href: "/admin/events",
         icon: Calendar,
         description: "View and manage events",
-      },
-      {
-        title: "Mess",
-        href: "/admin/mess-menu",
-        icon: Calendar,
-        description: "View and manage events",
-      },
+      }
     ]
   },
   {
