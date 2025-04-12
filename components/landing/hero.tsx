@@ -48,7 +48,7 @@ export function Hero() {
         </p>
         
         <div className="mt-8 flex items-center justify-center gap-4 sm:mt-10">
-          <Link href="/dashboard">
+          <Link href="/admin/dashboard">
             <ShimmerButton 
               className="flex items-center gap-2 px-6 py-3 text-base sm:text-lg"
               background="linear-gradient(to right, #0070F3, #38bdf8)"
