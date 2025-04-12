@@ -170,6 +170,9 @@ export default {
   			'shiny-text': 'shiny-text 8s infinite',
   			marquee: 'marquee var(--duration) infinite linear',
   			'marquee-vertical': 'marquee-vertical var(--duration) linear infinite'
+  		},
+  		maskImage: {
+  			'radial-gradient': 'radial-gradient(var(--tw-gradient-stops))'
   		}
   	}
   },
