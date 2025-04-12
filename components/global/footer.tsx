@@ -1,7 +1,7 @@
-import Icons from "@/components/global/icons"
-import { cn } from "@/lib/utils"
-import { Heart } from 'lucide-react'
+import { Building2 } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
+import { cn } from "@/lib/utils"
 
 interface FooterProps {
     className?: string;
@@ -11,123 +11,102 @@ const Footer = ({ className }: FooterProps) => {
     return (
         <footer className={cn("w-full border-t border-border", className)}>
             <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-                <div className="grid gap-8 lg:grid-cols-6">
+                <div className="grid gap-8 lg:grid-cols-4">
                     {/* Brand section */}
-                    <div className="lg:col-span-2">
+                    <div className="lg:col-span-1">
                         <div className="flex items-center space-x-2">
-                            {/* <Icons.Brain className="h-6 w-6" /> */}
-                            <span className="text-lg font-semibold">ProctorAI</span>
+                            <img 
+                                src="/dorm-track-logo.png"
+                                alt="DormTrack Logo"
+                                width={32}
+                                height={32}
+                                className="rounded-full"
+                            />
+                            <span className="text-lg font-semibold">DormTrack</span>
                         </div>
                         <p className="mt-4 text-sm text-muted-foreground">
-                            Secure and reliable AI-powered online examination proctoring platform for educational institutions
+                            A comprehensive hostel management platform that offers automation for room allocation, complaint redressal, mess feedback, and more.
                         </p>
                     </div>
 
                     {/* Links sections */}
-                    <div className="col-span-4 grid grid-cols-2 gap-8 sm:grid-cols-4">
-                        {/* Product */}
+                    <div className="col-span-3 grid grid-cols-1 gap-8 sm:grid-cols-3">
+                        {/* Hostel Management */}
                         <div>
-                            <h3 className="text-sm font-semibold">Product</h3>
+                            <h3 className="text-sm font-semibold">Hostel Management</h3>
                             <ul className="mt-4 space-y-3 text-sm">
                                 <li>
-                                    <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                                        Browser Extension
+                                    <Link href="/admin/hostels" className="text-muted-foreground hover:text-foreground transition-colors">
+                                        Hostels
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                                        Admin Dashboard
+                                    <Link href="/admin/rooms" className="text-muted-foreground hover:text-foreground transition-colors">
+                                        Rooms
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                                        AI Detection
+                                    <Link href="/admin/complaints" className="text-muted-foreground hover:text-foreground transition-colors">
+                                        Complaints
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                                        Pricing Plans
+                                    <Link href="/admin/maintenance" className="text-muted-foreground hover:text-foreground transition-colors">
+                                        Maintenance
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link href="/admin/events" className="text-muted-foreground hover:text-foreground transition-colors">
+                                        Events
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link href="/admin/mess-menu" className="text-muted-foreground hover:text-foreground transition-colors">
+                                        Mess Menu
                                     </Link>
                                 </li>
                             </ul>
                         </div>
 
-                        {/* Solutions */}
+                        {/* User Management */}
                         <div>
-                            <h3 className="text-sm font-semibold">Solutions</h3>
+                            <h3 className="text-sm font-semibold">User Management</h3>
                             <ul className="mt-4 space-y-3 text-sm">
                                 <li>
-                                    <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                                        Universities
+                                    <Link href="/admin/institutions" className="text-muted-foreground hover:text-foreground transition-colors">
+                                        Institutions
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                                        Schools
+                                    <Link href="/admin/students" className="text-muted-foreground hover:text-foreground transition-colors">
+                                        Students
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                                        Training Centers
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                                        Enterprises
+                                    <Link href="/admin/wardens" className="text-muted-foreground hover:text-foreground transition-colors">
+                                        Wardens
                                     </Link>
                                 </li>
                             </ul>
                         </div>
 
-                        {/* Resources */}
+                        {/* Account */}
                         <div>
-                            <h3 className="text-sm font-semibold">Resources</h3>
+                            <h3 className="text-sm font-semibold">Account</h3>
                             <ul className="mt-4 space-y-3 text-sm">
                                 <li>
-                                    <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                                        Documentation
+                                    <Link href="/admin/profile" className="text-muted-foreground hover:text-foreground transition-colors">
+                                        Profile
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                                        API Reference
+                                    <Link href="/admin/settings" className="text-muted-foreground hover:text-foreground transition-colors">
+                                        Settings
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                                        Help Center
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                                        Security
-                                    </Link>
-                                </li>
-                            </ul>
-                        </div>
-
-                        {/* Company */}
-                        <div>
-                            <h3 className="text-sm font-semibold">Legal</h3>
-                            <ul className="mt-4 space-y-3 text-sm">
-                                <li>
-                                    <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                                        Privacy Policy
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                                        Terms of Service
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                                        Cookie Policy
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                                        GDPR
+                                    <Link href="/admin/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">
+                                        Dashboard
                                     </Link>
                                 </li>
                             </ul>
@@ -138,7 +117,7 @@ const Footer = ({ className }: FooterProps) => {
                 {/* Copyright */}
                 <div className="mt-12 border-t border-border/40 pt-8">
                     <p className="text-sm text-muted-foreground">
-                        &copy; {new Date().getFullYear()} ProctorAI. All rights reserved.
+                        &copy; {new Date().getFullYear()} DormTrack. All rights reserved.
                     </p>
                 </div>
             </div>
