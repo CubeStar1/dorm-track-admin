@@ -43,13 +43,13 @@ export default function SignIn() {
       <div className="p-5 space-y-5">
         <div className="text-center space-y-3">
           <Image
-            src={"/logos/proctorai-logo.png"}
-            alt="ProctorAI Logo"
+            src={"/dorm-track-logo.png"}
+            alt="DormTrack Logo"
             width={50}
             height={50}
             className=" rounded-full mx-auto"
           />
-          <h1 className="font-bold">Sign in to ProctorAI</h1>
+          <h1 className="font-bold">Sign in to DormTrack</h1>
           <p className="text-sm">Welcome back! Please sign in to continue</p>
         </div>
         <Social redirectTo={next || "/"} />

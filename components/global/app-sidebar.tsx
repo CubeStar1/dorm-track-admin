@@ -51,6 +51,13 @@ const navigationGroups = [
         description: "Room management",
       },
       {
+        title: "Room Allocation",
+        href: "/admin/room-allocations",
+        icon: Home,
+        description: "Room Allocation",
+      },
+      
+      {
         title: "Complaints",
         href: "/admin/complaints",
         icon: AlertTriangle,

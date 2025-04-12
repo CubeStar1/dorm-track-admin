@@ -145,10 +145,10 @@ export default function CompleteProfilePage() {
   // Render role selection form
   if (!selectedRole) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-white py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-lg border border-gray-100">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-white py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-lg border border-gray-200">
           <div className="space-y-4">
-            <h2 className="text-center text-3xl font-extrabold text-gray-900">
+            <h2 className="text-center text-3xl font-extrabold text-gray-800">
               Select Your Role
             </h2>
             <p className="text-center text-sm text-gray-600">
@@ -165,32 +165,32 @@ export default function CompleteProfilePage() {
                   <FormItem>
                     <div className="grid grid-cols-1 gap-4">
                       <Card
-                        className={`p-6 cursor-pointer transition-all ${
-                          field.value === 'admin' ? 'border-indigo-600 bg-indigo-50' : ''
+                        className={`p-6 cursor-pointer transition-all hover:border-blue-500 ${
+                          field.value === 'admin' ? 'border-blue-600 bg-blue-50' : 'hover:bg-gray-50'
                         }`}
                         onClick={() => field.onChange('admin')}
                       >
-                        <div className="font-semibold">Institution Admin</div>
+                        <div className="font-semibold text-gray-800">Institution Admin</div>
                         <div className="text-sm text-gray-600">Manage institution-wide settings and users</div>
                       </Card>
                       <Card
-                        className={`p-6 cursor-pointer transition-all ${
-                          field.value === 'warden' ? 'border-indigo-600 bg-indigo-50' : ''
+                        className={`p-6 cursor-pointer transition-all hover:border-blue-500 ${
+                          field.value === 'warden' ? 'border-blue-600 bg-blue-50' : 'hover:bg-gray-50'
                         }`}
                         onClick={() => field.onChange('warden')}
                       >
-                        <div className="font-semibold">Hostel Warden</div>
+                        <div className="font-semibold text-gray-800">Hostel Warden</div>
                         <div className="text-sm text-gray-600">Manage hostel operations and residents</div>
                       </Card>
                     </div>
-                    <FormMessage />
+                    <FormMessage className="text-red-600" />
                   </FormItem>
                 )}
               />
 
               <Button
                 type="submit"
-                className="w-full bg-indigo-600 hover:bg-indigo-700 rounded-xl h-11 mt-8"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-11 mt-8"
               >
                 Continue
               </Button>
@@ -338,10 +338,10 @@ export default function CompleteProfilePage() {
   );
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-white py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-lg border border-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-white py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-lg border border-gray-200">
         <div className="space-y-4">
-          <h2 className="text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="text-center text-3xl font-extrabold text-gray-800">
             Complete Your Profile
           </h2>
           <p className="text-center text-sm text-gray-600">
@@ -355,7 +355,7 @@ export default function CompleteProfilePage() {
               <CommonFields form={adminForm} />
               <Button
                 type="submit"
-                className="w-full bg-indigo-600 hover:bg-indigo-700 rounded-xl h-11 mt-8"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-11 mt-8"
                 disabled={isSubmitting || isLoadingInstitutions}
               >
                 {isSubmitting ? 'Completing...' : 'Complete Registration'}
@@ -378,25 +378,25 @@ export default function CompleteProfilePage() {
                       value={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger className="rounded-xl h-11">
+                        <SelectTrigger className="rounded-xl h-11 bg-white border-gray-300 text-gray-900">
                           <SelectValue placeholder="Select hostel" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         {hostels?.map((hostel: any) => (
-                          <SelectItem key={hostel.id} value={hostel.id}>
+                          <SelectItem key={hostel.id} value={hostel.id} className="text-gray-900">
                             {hostel.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                    <FormMessage />
+                    <FormMessage className="text-red-600" />
                   </FormItem>
                 )}
               />
               <Button
                 type="submit"
-                className="w-full bg-indigo-600 hover:bg-indigo-700 rounded-xl h-11 mt-8"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-11 mt-8"
                 disabled={isSubmitting || isLoadingInstitutions || isLoadingHostels}
               >
                 {isSubmitting ? 'Completing...' : 'Complete Registration'}
@@ -408,7 +408,7 @@ export default function CompleteProfilePage() {
         <Button
           type="button"
           variant="outline"
-          className="w-full rounded-xl h-11"
+          className="w-full rounded-xl h-11 border-gray-300 text-gray-700 hover:bg-gray-50"
           onClick={() => setSelectedRole(null)}
         >
           Back to Role Selection
